@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+
 import axiosWithAuth from "./axiosWithAuth";
 
 const initialColor = {
@@ -7,46 +7,87 @@ const initialColor = {
   code: { hex: "" }
 };
 
-const ColorList = ({ colors, updateColors, props }) => {
+const ColorList = ({ colors, props, updateColors }) => {
   //console.log(colors);
   const [editing, setEditing] = useState(false);
   const [colorToEdit, setColorToEdit] = useState(initialColor);
-
+  // useEffect(() => {
+  //   if (props.colors.length > 0) {
+  //     const newColor = props.colors.find(thing => `${thing.id}` === props.match.params.id);
+  //     console.log(newColor);
+  //     setEditing(newColor);
+  //   }
+  // }, [props.match.params.id]);
   const editColor = color => {
     setEditing(true);
     setColorToEdit(color);
   };
+
   const saveEdit = e => {
     e.preventDefault();
     // Make a put request to save your updated color
     // think about where will you get the id from...
     // where is is saved right now?
+
     axiosWithAuth()
-      .put(`http://localhost:5000/api/colors/${colors.id}`, colors)
+      .put(`/colors/${colorToEdit.id}`, colorToEdit)
       .then(res => {
-        this.props.colorToEdit(res.data);
-        this.props.history.push('/color-list')
+        updateColors(colors.map(color => {
+          if (colorToEdit.id === color.id) {
+            return color = res.data
+          } else {
+            return color
+          }
+        }));
+
+
+        props.history.push('/')
       })
       .catch(err => console.log(err.response));
   };
 
-  const deleteColor = color => {
+
+  // const deleteColor = color => {
+  //   // make a delete request to delete this color
+
+  //   axiosWithAuth()
+
+  //     .delete(`/colors/${color.id}`)
+  //     .then(res => 
+  //       console.log(res.data))
+  //       props.updateColors(res.data);
+  //       props.history.push('/bubblepage');
+  //       updateColors(colors.filter(color => {
+  //         if (res.data !== color.id) {
+  //           return color
+  //         }}
+
+  //       ))
+  const deleteColor = colors => {
+
     // make a delete request to delete this color
 
-    axiosWithAuth()
-      .delete('http://localhost:5000/api/colors/:id')
-      .then(res => {
-        props.updateColors(res.data);
-        props.history.push("/colors-list");
-      })
-      .catch(err => console.log(err));
-  }
 
+    axiosWithAuth()
+      .delete(`/colors/${colorToEdit.id}`)
+      .then(res => {
+        console.log(res.data)
+        updateColors(res.data);
+        props.history.push('/color-list');
+      })
+      .catch(err => console.log(err.response));
+  };
+
+
+  if (!colors) {
+    return <div>Loading  information...</div>;
+  }
 
 
   return (
     <div className="colors-wrap">
       <p>colors</p>
+
       <ul>
         {colors.map(color => (
           <li key={color.color} onClick={() => editColor(color)}>
@@ -103,4 +144,5 @@ const ColorList = ({ colors, updateColors, props }) => {
   );
 
 }
+
 export default ColorList;
