@@ -33,10 +33,11 @@ const Bubbles = ({ colors }) => {
                   return (
                     <Circle
                       key={key}
+                      fill={colors[i].code.hex}
                       cx={x}
                       cy={y}
                       r={r}
-                      fill={colors[i].code.hex}
+
                     />
                   );
                 }
